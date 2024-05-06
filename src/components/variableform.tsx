@@ -10,17 +10,17 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { VariableFormProps } from "@/types/variableform";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+import { Accordion } from "@/components/ui/accordion";
+import { VariableEnvSelector } from "./VariableEnvSelector";
 
-export default function VariableForm(props: VariableFormProps) {
-  const variablePool = Object.keys(props.variable)
+export default function VariableForm({
+  variable,
+  variable_name,
+  children,
+}: VariableFormProps) {
+  const variablePool = Object.keys(variable)
     .map((envName) => {
-      return { environment_scope: envName, value: props.variable[envName] };
+      return { environment_scope: envName, value: variable[envName] };
     })
     .reduce(
       (
@@ -37,57 +37,27 @@ export default function VariableForm(props: VariableFormProps) {
       },
       {},
     );
-
   return (
     <Dialog>
-      <DialogTrigger asChild>{props.children}</DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
         className="transition-[padding] sm:p-8 px-6 rounded-md overflow-y-auto max-h-[90%] max-w-7xl md:w-[90%] w-[95%]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Edit {props.variable_name}</DialogTitle>
+          <DialogTitle>Edit {variable_name}</DialogTitle>
           <DialogDescription className="opacity-40">
-            Found {Object.keys(props.variable).length} environments.
+            Found {Object.keys(variable).length} environments.
           </DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-4">
           <Accordion type="multiple" className="w-full">
             {Object.keys(variablePool).map((envValue) => (
-              <AccordionItem value={envValue} key={envValue}>
-                <AccordionTrigger>{envValue}</AccordionTrigger>
-                <AccordionContent className="">
-                  {variablePool[envValue].map((envName) => (
-                    <Button
-                      key={envName}
-                      variant="outline"
-                      className="duration-300 transition-[opacity] bg-accent opacity-75 hover:opacity-100 m-1 first:ml-0 last:mr-0"
-                      onClick={(event) => {
-                        event.preventDefault();
-                      }}
-                    >
-                      {envName}
-                    </Button>
-                  ))}
-                  {Object.keys(props.variable)
-                    .filter(
-                      (envVar) =>
-                        !Object.keys(variablePool[envValue]).includes(envVar),
-                    )
-                    .map((envName) => (
-                      <Button
-                        key={envName}
-                        variant="outline"
-                        className="m-1 first:ml-0 last:mr-0"
-                        onClick={(event) => {
-                          event.preventDefault();
-                        }}
-                      >
-                        {envName}
-                      </Button>
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
+              <VariableEnvSelector
+                envValue={envValue}
+                variablePool={variablePool}
+                key={envValue}
+              />
             ))}
           </Accordion>
           <DialogFooter>
